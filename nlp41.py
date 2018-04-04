@@ -22,8 +22,8 @@ class Chunk:
     def __str__(self):
         st = []
         for m in self.morphs:
-            st.append(str(m))
-        return '--'.join(st)
+            st.append(m.surface)
+        return ''.join(st) + '/' + self.dst
 
 
 def main():
