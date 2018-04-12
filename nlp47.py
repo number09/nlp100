@@ -151,12 +151,13 @@ def kaku_pattern(chunks):
 def wo_kaku_pattern(chunks):
 
 
-    zyutsugo = ''
-    kakarisaki_txt = ''
-    kakarimoto_idx = 0
+    kakarimoto_idx = -1
     doushi_idx = -1
-    dst = -1
-    moto = -1
+
+    setsu = []
+    zyoshi = []
+
+
     for idx, c in enumerate(chunks):
 
         # 係り元（カレントの）判定
@@ -168,62 +169,51 @@ def wo_kaku_pattern(chunks):
         elif 'サ変接続' not in kakarimoto_pos1:
             # カレントの文節が、サ変接続でない
             continue
+        elif kakarimoto_pos.index('名詞') != kakarimoto_pos1.index('サ変接続'):
+            continue
         elif kakarimoto_pos1.index('サ変接続') + 1 == len(kakarimoto_pos1):
             continue
 
         elif not ((c.morphs[kakarimoto_pos1.index('サ変接続') + 1].pos == '助詞')
-                and (c.morphs[kakarimoto_pos1.index('サ変接続') + 1].base == "を")):
+                  and (c.morphs[kakarimoto_pos1.index('サ変接続') + 1].base == "を")):
             # サ変接続名詞に続く助詞が、'を' でない
             continue
         else:
             # 係り元の条件を満たす
-            #pass
-            #for w in c.morphs:
-                #print(w)
-            #print(len(kakarimoto_pos), kakarimoto_pos1.index('サ変接続'))
-            #print(c.morphs[kakarimoto_pos1.index('サ変接続') + 1].base)
-            kakarimoto_idx = kakarimoto_pos1.index('サ変接続')
+            pass
 
-
-        # 係り先の判定
+        # カレントの文節の係り先の判定
         if int(c.dst) > 0:
             kakarisaki = chunks[int(c.dst)]
             kakarisaki_pos = [x.pos for x in kakarisaki.morphs]
-            kakarisaki_base = [x.base for x in kakarisaki.morphs]
             if '動詞' not in kakarisaki_pos:
                 # 係り先文節が、動詞を含まない
                 continue
             else:
                 # かかり先なし
                 # 最左（idxの最小）の動詞を取る
-                if (doushi_idx < 0) or (doushi_idx > 0 and doushi_idx < kakarisaki_pos.index('動詞')):
-                    doushi_idx = kakarisaki_pos.index('動詞')
-                    zyutsugo = c.morphs[kakarimoto_idx].base + c.morphs[kakarimoto_idx+1].base + kakarisaki_base[doushi_idx]
-                    dst = int(c.dst)
-                    moto = int(idx)
+                if (doushi_idx < 0) or (doushi_idx > 0 and doushi_idx > int(c.dst)):
+                    doushi_idx = int(c.dst)
+                    kakarimoto_idx = idx
 
 
+    if kakarimoto_idx > 0 and doushi_idx > 0:
 
-    #chunksすべてチェック後
-    if zyutsugo:
-        print(dst)
-        print(moto)
-        zyo = []
-        setsu = []
-        #test = []
-        # todo:まだおかしい
-        for idy, x in enumerate(chunks):
-            if x.dst == str(dst) and idy != moto:
-                setsu.append(str(x))
-                for w in x.morphs:
-                    if w.pos == '助詞' and w.pos1 == '格助詞':
-                        zyo.append(w.surface)
-        print(zyutsugo, zyo, setsu)
+        w = list(map(lambda y: str(y), filter(lambda x: int(x.dst) == doushi_idx and
+                                                        str(chunks[kakarimoto_idx]) != str(x), chunks)))
+        z = []
+        for v in filter(lambda x: int(x.dst) == doushi_idx and
+                                                        str(chunks[kakarimoto_idx]) != str(x), chunks):
+            # todo:格助詞又は係助詞だとおもうが、他にもある可能性あり
+            if '格助詞' in [x.pos1 for x in v.morphs]:
+                i = [x.pos1 for x in v.morphs].index('格助詞')
+                z.append(v.morphs[i].base)
+            if '係助詞' in [x.pos1 for x in v.morphs]:
+                i = [x.pos1 for x in v.morphs].index('係助詞')
+                z.append(v.morphs[i].base)
 
 
-
-
-        #print(zyutsugo, [ str(y) for y in list(filter(lambda x: x.dst == str(dst), chunks))])
+        print(chunks[kakarimoto_idx], chunks[doushi_idx], z, w)
 
 
 
