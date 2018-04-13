@@ -8,16 +8,17 @@ def main():
         for line in infile:
             split_pattern(line)
 
-def split_pattern(str):
+def split_pattern(word):
 
     reg_sep = re.compile(r'[.;:?!] (?:[A-Z])')
 
-    i = reg_sep.search(str)
+    i = reg_sep.search(word)
     if i is not None:
-        print(str[:i.start()])
-        split_pattern(str[i.end()-1:])
+        print(word[:i.start()])
+        split_pattern(word[i.end()-1:])
     else:
-        print(str)
+        if word.strip():
+            print(word)
 
 
 if __name__ == '__main__':
