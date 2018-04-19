@@ -9,6 +9,7 @@ def main():
     root = tree.getroot()
 
 
+
     conf = {}
     for doc in root:
         for coref in doc.findall('coreference'):
@@ -29,7 +30,10 @@ def main():
 
     #print(conf)
 
-    for sentence in root.iter('sentence'):
+    document = root[0][1]
+
+    #for sentence in root.iter('sentence'):
+    for sentence in document.iter('sentence'):
         # todo:error
         sentence_id = sentence.attrib["id"]
         for token in sentence.iter('token'):
@@ -48,10 +52,11 @@ def main():
                     if (sentence_id + '-' + token_id + '-start') in conf:
                         print(conf[sentence_id + '-' + token_id + '-start'], end='')
 
-                    print(word + ' ', end='')
+                    print(word, end='')
 
                     if (sentence_id + '-' + token_id + '-end') in conf:
                         print(conf[sentence_id + '-' + token_id + '-end'], end='')
+                    print(' ', end='')
 
 
         print('')
